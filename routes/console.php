@@ -8,4 +8,6 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote')->hourly();
 
-Schedule::command('insurance:check-expiry')->daily();
+//Este es para enviar recordatorios a los clientes 
+//con CheckInsuranceExpiry
+//Schedule::command('insurance:check-expiry')->daily(); 

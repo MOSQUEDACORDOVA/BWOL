@@ -12,7 +12,7 @@ class ChatBotController extends Controller
         $to = "whatsapp:+51945692831";
 
         $this->sendWhatsAppMessage("ePALE isaac 3", $to);
-        return;
+        return response()->json(['status' => 'El chat bot funciona']);
     }
 
     /**
