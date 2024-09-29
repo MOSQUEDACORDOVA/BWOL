@@ -9,11 +9,9 @@ class ChatGPTController extends Controller
 {
     public function chat(Request $request)
     {
-        $validated = $request->validate([
-            'message' => 'required|string',
-        ]);
+        
 
-        $message = $validated['message'];
+        $message = $request['message'];
         $apiKey = env('OPENAI_API_KEY');
         
         $client = new Client();
@@ -39,5 +37,6 @@ class ChatGPTController extends Controller
             \Log::error('Error contacting OpenAI API: ' . $e->getMessage());
             return response()->json(['error' => 'Error al comunicarse con la API'], 500);
         }
+        //return response()->json(['Test' => 'Test'], 500);
     }
 }
