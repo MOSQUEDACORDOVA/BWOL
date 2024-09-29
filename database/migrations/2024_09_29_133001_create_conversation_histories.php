@@ -13,7 +13,10 @@ return new class extends Migration
     {
         Schema::create('conversation_histories', function (Blueprint $table) {
             $table->id();
-            $table->timestamps();
+            $table->string('user_phone'); // Número de teléfono del usuario
+            $table->enum('role', ['user', 'assistant']); // Identifica si es usuario o ChatGPT
+            $table->text('message'); // Mensaje enviado o recibido
+            $table->timestamps(); // Tiempos de creación y actualización
         });
     }
 
