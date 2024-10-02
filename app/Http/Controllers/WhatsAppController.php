@@ -52,13 +52,75 @@ class WhatsAppController extends Controller
                     'Content-Type' => 'application/json',
                 ],
                 'json' => [
-                    'model' => 'gpt-3.5-turbo', // Cambiar a 'gpt-4' si es necesario
+                    'model' => 'gpt-4o', // Cambiar a 'gpt-4' si es necesario
                     'messages' => $chatHistory, // Enviar el historial completo
                 ],
             ]);
 
             $responseData = json_decode($response->getBody(), true);
             $reply = $responseData['choices'][0]['message']['content'];
+
+            // Registrar la respuesta para debugging
+            \Log::info('Respuesta de ChatGPT: ' . $reply);
+
+            // Verificar si ChatGPT solicitó una consulta a la base de datos
+            if (preg_match('/\{query_database:"([^"]+)"\}/', $reply, $matches)) {
+                $condition = $matches[1];
+                \Log::info('Condición encontrada: ' . $condition);
+
+                // Añadir comillas simples a los valores de cadena si es necesario
+                if (preg_match('/=([a-zA-Z\s]+)/', $condition, $valueMatches)) {
+                    // Asegurarse de que el valor esté entre comillas simples
+                    $value = $valueMatches[1];
+                    $condition = str_replace($value, "'$value'", $condition);
+                }
+
+                \Log::info('Condición SQL ajustada: ' . $condition);
+
+                // Realizar la consulta a la base de datos
+                $data = \DB::table('properties')->whereRaw($condition)->get();
+
+                \Log::info('Respuesta SQL: ' . $data);
+
+                if ($data->isEmpty() || $data->count() === 0) {
+                    $chatHistory[] = ['role' => 'system', 'content' => 'SYSTEMA-666: No tenemos esa información.'];
+
+                    // Volver a llamar a ChatGPT para que genere una respuesta utilizando esos datos
+                    $response = $client->request('POST', 'https://api.openai.com/v1/chat/completions', [
+                        'headers' => [
+                            'Authorization' => 'Bearer ' . $apiKey,
+                            'Content-Type' => 'application/json',
+                        ],
+                        'json' => [
+                            'model' => 'gpt-3.5-turbo',
+                            'messages' => $chatHistory,
+                        ],
+                    ]);
+
+                    $responseData = json_decode($response->getBody(), true);
+                    $reply = $responseData['choices'][0]['message']['content'];
+
+                } else {
+
+                    // Añadir los resultados obtenidos como un nuevo mensaje en el historial
+                    $chatHistory[] = ['role' => 'system', 'content' => 'SYSTEMA-666: Responde con el prefijo 333:' . $data];
+
+                    // Volver a llamar a ChatGPT para que genere una respuesta utilizando esos datos
+                    $response = $client->request('POST', 'https://api.openai.com/v1/chat/completions', [
+                        'headers' => [
+                            'Authorization' => 'Bearer ' . $apiKey,
+                            'Content-Type' => 'application/json',
+                        ],
+                        'json' => [
+                            'model' => 'gpt-3.5-turbo',
+                            'messages' => $chatHistory,
+                        ],
+                    ]);
+
+                    $responseData = json_decode($response->getBody(), true);
+                    $reply = $responseData['choices'][0]['message']['content'];
+                }
+            }
 
             // Guardar la respuesta del asistente en la base de datos
             $this->storeMessage($from, 'assistant', $reply);
