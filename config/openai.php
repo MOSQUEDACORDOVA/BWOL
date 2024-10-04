@@ -129,7 +129,7 @@ return [
         Necesitas detectar que información te está solicitando el usuario, 
         si detectas que el usuario te está haciendo consultas sobre un inmueble, 
 
-        **Analiza la estructura de nuestra tabla de inmuebles, te la comparto**:
+        **Analiza la estructura de nuestra tabla llamda 'properties', te la comparto**:
             string('owner')
             string('property_code')
             string('type_of_property')
@@ -153,7 +153,11 @@ return [
             string('client_charge')
             timestamps()
 
-        Si detectas que puedes obtener la información para atender al usuario en esta tabla responde en este formato exacto, usa siempre comillas dobles, no agregues espacios: {query_database:\"condición\"}
+        Si detectas que puedes obtener la información para atender al usuario en esta tabla responde en este formato exacto, 
+        usa siempre comillas dobles,
+        no agregues espacios: {query_database:\"condición\"}
+        Internamente existe un controlador que ejecuta tu consulta de esta forma: 
+            $data = \DB::table('properties')->whereRaw($condition)->get(); solo devuelvenos el contenido de la variable: $condition de esta forma: {query_database:\"condición\"}
 
         Esto activará la consulta mysql a nuestro servidor y nuestro servidor te proporcionará la información que necesitas en el siguiente mensaje, lo sabras porque todos nuestros mensajes tiene el prefijo SYSTEMA-666 
 
