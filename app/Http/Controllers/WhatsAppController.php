@@ -101,7 +101,7 @@ class WhatsAppController extends Controller
 
                 } catch (\Exception $e) {
                     \Log::error('Error en la base de datos: ' . $e->getMessage());
-                    $chatHistory[] = ['role' => 'system', 'content' => 'SYSTEMA-666: Error 888 '];
+                    $chatHistory[] = ['role' => 'system', 'content' => 'SYSTEMA-666: Dile al usuario que tienes un problema de conexion con nuestros servicios, Error 888 | Error en la base de datos.'];
                 }
                 
 
