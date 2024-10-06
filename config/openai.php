@@ -149,8 +149,8 @@ return [
             text('maintenance_instructions')
             string('owner_closet')
             string('documents')
-            string('payment_hskp')
-            string('client_charge')
+            string('payment_hskp') //Precio limpieza
+            string('client_charge') //Precio 
             timestamps()
 
         Si detectas que puedes obtener la información para atender al usuario en esta tabla responde en este formato exacto, 
