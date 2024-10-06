@@ -74,12 +74,14 @@ class WhatsAppController extends Controller
                 $condition = $matches[1];
                 \Log::info('Condición encontrada: ' . $condition);
 
-                // Añadir comillas simples a los valores de cadena si es necesario
-                if (preg_match('/=([a-zA-Z\s]+)/', $condition, $valueMatches)) {
-                    // Asegurarse de que el valor esté entre comillas simples
-                    $value = $valueMatches[1];
-                    $condition = str_replace($value, "'$value'", $condition);
-                }
+                // Ajustar el patrón para capturar correctamente la columna y el valor entre comillas
+    if (preg_match('/(\w+)\s*=\s*\'([^\']+)\'/', $condition, $valueMatches)) {
+        $column = $valueMatches[1];
+        $value = $valueMatches[2];
+
+        // Reconstruir la condición sin modificar las comillas
+        $condition = "$column = '$value'";
+    }
 
                 \Log::info('Condición SQL ajustada: ' . $condition);
 
@@ -130,8 +132,19 @@ class WhatsAppController extends Controller
             return response()->json(['reply' => $reply]);
 
         } catch (\Exception $e) {
+
             \Log::error('Error contacting OpenAI API: ' . $e->getMessage());
+            
+            $reply = "Lo siento, tu consulta es muy extensa, ¿podrias darme más detalles por favor?";
+            
+            // Guardar la respuesta del asistente en la base de datos
+            $this->storeMessage($from, 'assistant', $reply);
+
+            // Enviar la respuesta vía WhatsApp
+            $this->sendWhatsAppMessage($reply, $from);
+
             return response()->json(['error' => 'Error al comunicarse con la API'], 500);
+
         }
     }
 
